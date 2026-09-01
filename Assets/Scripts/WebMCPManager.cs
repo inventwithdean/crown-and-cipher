@@ -34,18 +34,18 @@ public class WebMCPManager : MonoBehaviour
 
     private void HandlePlayerMessage(NPCProfile npc, string message)
     {
-        EnqueuePlayerMessage(npc.npcID, message);
+        EnqueuePlayerMessage(npc.npcName, message);
     }
 
     private void HandleConversationEnded(NPCProfile npc)
     {
-        EnqueueInteractionEvent($"Conversation ended with {npc.npcID}");
+        EnqueueInteractionEvent($"Conversation ended with {npc.npcName}");
     }
 
     [System.Serializable]
     public class DialogueData
     {
-        public string npc_id;
+        public string npcName;
         public string dialogue;
     }
 
@@ -55,7 +55,7 @@ public class WebMCPManager : MonoBehaviour
 
         if (DialogueUI.Instance != null)
         {
-            DialogueUI.Instance.ReceiveNPCDialogue(parsedData.npc_id, parsedData.dialogue);
+            DialogueUI.Instance.ReceiveNPCDialogue(parsedData.npcName, parsedData.dialogue);
         }
     }
 

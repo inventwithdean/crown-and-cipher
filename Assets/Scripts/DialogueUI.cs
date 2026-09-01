@@ -87,9 +87,9 @@ public class DialogueUI : MonoBehaviour
 
     }
 
-    public void ReceiveNPCDialogue(string npcId, string text)
+    public void ReceiveNPCDialogue(string npcName, string text)
     {
-        if (currentNPC != null && currentNPC.npcID == npcId && npcDialogueText != null)
+        if (currentNPC != null && currentNPC.npcName == npcName && npcDialogueText != null)
         {
             npcDialogueText.text = text;
         }

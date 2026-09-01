@@ -50,8 +50,6 @@ public class VehicleInteract : MonoBehaviour
     {
         isDriving = true;
         DialogueUI.Instance.ToggleInteractPrompt(false);
-        // player.GetComponent<FPSController>().enabled = false;
-        // player.GetComponent<CharacterController>().enabled = false;
         player.SetActive(false);
         vehicleCamera.SetActive(true);
         carController.enabled = true;
@@ -61,8 +59,6 @@ public class VehicleInteract : MonoBehaviour
     {
         isDriving = false;
         player.transform.position = exitPoint.position;
-        // player.GetComponent<FPSController>().enabled = true;
-        // player.GetComponent<CharacterController>().enabled = true;
         player.SetActive(true);
         vehicleCamera.SetActive(false);
         carController.enabled = false;

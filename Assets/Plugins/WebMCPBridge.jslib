@@ -9,21 +9,22 @@ mergeInto(LibraryManager.library, {
 
         window.mcpMessageQueue = [];
         window.mcpPendingResolve = null;
+        window.mcpLocationResolve = null;
 
         // Register the Speak Tool
         mcpContext.registerTool({
             name: "speak",
-            description: "Sends text dialogue to the NPC with given id.",
+            description: "The NPC with the given name will speak the dialogue to the player.",
             inputSchema: {
                 type: "object",
                 properties: {
-                    npc_id: { type: "string", description: "The ID of the NPC" },
+                    npc_name: { type: "string", description: "The Name of the NPC" },
                     dialogue: { type: "string", description: "The text to say to the player." }
                 },
-                required: ["npc_id", "dialogue"]
+                required: ["npc_name", "dialogue"]
             },
             execute: function (args) {
-                var payload = JSON.stringify({ npc_id: args.npc_id, dialogue: args.dialogue });
+                var payload = JSON.stringify({ npcName: args.npc_name, dialogue: args.dialogue });
                 window.unityInstance.SendMessage('WebMCPManager', 'ReceiveDialogue', payload);
                 return "Speaking...";
             },
@@ -51,14 +52,34 @@ mergeInto(LibraryManager.library, {
             }
         });
 
+        mcpContext.registerTool({
+            name: "get_npc_location",
+            description: "Returns the top 2 closest locations to the specified NPC.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    npc_name: { type: "string", description: "The Name of the NPC" }
+                },
+                required: ["npc_name"]
+            },
+            execute: function (args) {
+                return new Promise((resolve) => {
+                    window.mcpLocationResolve = resolve;
+                    var payload = JSON.stringify({ npcName: args.npc_name });
+                    window.unityInstance.SendMessage("NPCManager", "GetNPCLocationContext", payload);
+                });
+            },
+        });
+
+
+
         console.log("WebMCP Interrogation Tools Registered!");
-        // window.unityInstance.SendMessage('WebMCPManager', 'ReceiveDialogue', 2, "HEYYY");
     },
 
-    EnqueuePlayerMessage: function (npcIdPtr, messagePtr) {
-        var npcId = UTF8ToString(npcIdPtr);
+    EnqueuePlayerMessage: function (npcNamePtr, messagePtr) {
+        var npcName = UTF8ToString(npcNamePtr);
         var message = UTF8ToString(messagePtr);
-        var payload = JSON.stringify({ event: "player_spoke", npcId: npcId, message: message });
+        var payload = JSON.stringify({ event: "player_spoke", npc_name: npcName, message: message });
         if (window.mcpPendingResolve) {
             var resolve = window.mcpPendingResolve;
             window.mcpPendingResolve = null;
@@ -70,8 +91,8 @@ mergeInto(LibraryManager.library, {
 
     EnqueueInteractionEvent: function (messagePtr) {
         var message = UTF8ToString(messagePtr);
-        
-        var payload = JSON.stringify({ event: message});
+
+        var payload = JSON.stringify({ event: message });
 
         if (window.mcpPendingResolve) {
             var resolve = window.mcpPendingResolve;
@@ -79,6 +100,14 @@ mergeInto(LibraryManager.library, {
             resolve(payload);
         } else {
             window.mcpMessageQueue.push(payload);
+        }
+    },
+
+    ReturnNPCLocation: function (resultPtr) {
+        var result = UTF8ToString(resultPtr);
+        if (window.mcpLocationResolve) {
+            window.mcpLocationResolve(result);
+            window.mcpLocationResolve = null;
         }
     }
 

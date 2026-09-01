@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class NPCProfile: MonoBehaviour
 {
-    public string npcID = System.Guid.NewGuid().ToString();
-    public string npcName = "Citizen";
+    public string npcName = "NPCName";
+    [TextArea(3, 10)]
+    public string description = "NPC's description";
 }
