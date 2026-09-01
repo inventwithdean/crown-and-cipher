@@ -8,7 +8,7 @@ public class FPSController : MonoBehaviour
     public float lookSensitivity = 0.15f;
     public float gravity = -9.81f;
     public float jumpHeight = 1.2f;
-    public Transform playerCamera;
+    public Transform cameraTarget;
 
     private CharacterController controller;
     private Vector3 velocity;
@@ -58,7 +58,7 @@ public class FPSController : MonoBehaviour
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        cameraTarget.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         transform.Rotate(Vector3.up * mouseX);
     }
 
