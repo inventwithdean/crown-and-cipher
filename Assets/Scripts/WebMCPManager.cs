@@ -19,8 +19,12 @@ public class WebMCPManager : MonoBehaviour
     // [TextArea(3, 10)]
     private string systemPrompt = "This is a WebMCP powered Unity WebGL game, setup in a city. There has been a murder of a guy and her wife is standing near him and continuously crying. You are given some story data to weave the story as player interacts with these NPCs. When the player interacts with them, you'll possess the NPC and use the speak tool to speak to the player from that NPC's viewpoint. Craft a beautiful story as the game goes on. The player has an orange sedan which they'll use to travel the city. Use only the specified locations, and to get any details about an NPC, just use the get_npc_location tool. So use that to craft a rich quest experience, where the player would travel and meet people and go back and forth collecting information and asking right questions, finally catching the killer. Use the wait tool, and keep using the wait tool in loop until the player tells you to stop. Until then, do NOT exit the game loop, which is the wait tool. You can use any tool you like, but must call the wait tool instantly after every tool, and keep on going.";
 
+    public GameObject startupControlsPanel;
+    public GameObject winningPanel;
+
     void Start()
     {
+        winningPanel.SetActive(false);
 #if UNITY_WEBGL && !UNITY_EDITOR
         InitWebMCPTools();
         DialogueUI.OnMessageSubmitted += HandlePlayerMessage;
@@ -59,6 +63,7 @@ public class WebMCPManager : MonoBehaviour
         }
     }
 
+    // Called from WebMCPBridge.jslib
     // Decide who the killer is and setup the chain of key NPCs 
     public void GetSystemContext()
     {
@@ -138,7 +143,21 @@ public class WebMCPManager : MonoBehaviour
             Debug.LogWarning("Not enough NPCs in the scene to assign a killer and 3 key NPCs or to setup indirect knowledge graph. Make sure the scene has atleast 7 NPCs.");
         }
 
+        // Destroy startup panel
+        Destroy(startupControlsPanel);
+        // Allow controls
+        FPSController.Instance.setControllable(true);
         ReturnSystemContext($"{systemPrompt}\n\n{storyConstraints}\n\n{knowledgeConstraints}\n\n{rosterContext}\n\n{locationsContext}");
+    }
+
+    public void ShowWinningPanel()
+    {
+        // Show Winning Panel
+        winningPanel.SetActive(true);
+        // Destroy DialogueUI
+        Destroy(DialogueUI.Instance);
+        // Remove controls
+        FPSController.Instance.setControllable(false);
     }
 
 }

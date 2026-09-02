@@ -21,6 +21,9 @@ public class FPSController : MonoBehaviour
     public InputAction lookAction;
     public InputAction jumpAction;
 
+    private bool controllable = false;
+    public static FPSController Instance = null;
+
     void OnEnable()
     {
         moveAction.Enable();
@@ -38,12 +41,16 @@ public class FPSController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
         controller = GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!controllable) return;
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             if (DialogueUI.Instance != null && !DialogueUI.Instance.inputUI.activeSelf)
@@ -141,5 +148,10 @@ public class FPSController : MonoBehaviour
             currentTarget = null;
             DialogueUI.Instance.ToggleInteractPrompt(false);
         }
+    }
+
+    public void setControllable(bool isControllable)
+    {
+        controllable = isControllable;
     }
 }

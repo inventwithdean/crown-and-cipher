@@ -95,6 +95,23 @@ mergeInto(LibraryManager.library, {
                 });
             }
         });
+        
+        mcpContext.registerTool({
+            name: "show_winning_panel",
+            description: "Shows the winning panel and ends the game. Only use when player has finally confronted the killer. Then stop calling tools.",
+            inputSchema: {
+                type: "object",
+                properties: {},
+                required: []
+            },
+            execute: function (args) {
+                return new Promise((resolve) => {
+                    window.mcpSystemContextResolve = resolve;
+                    window.unityInstance.SendMessage("WebMCPManager", "ShowWinningPanel");
+                });
+            }
+        });
+
 
         console.log("WebMCP Tools Registered!");
     },
