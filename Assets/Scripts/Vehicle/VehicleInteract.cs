@@ -20,7 +20,7 @@ public class VehicleInteract : MonoBehaviour
     }
     void Update()
     {
-        if (Keyboard.current.fKey.wasPressedThisFrame)
+        if (Keyboard.current.tabKey.wasPressedThisFrame)
         {
             if (isPlayerNear && !isDriving) EnterVehicle();
             else if (isDriving) ExitVehicle();

@@ -49,8 +49,9 @@ public class LocationMarkers : MonoBehaviour
 
     void Update()
     {
-        // Toggle icons with the 'M' key
-        if (Keyboard.current.mKey.wasPressedThisFrame)
+        bool isDialogueOpen = DialogueUI.Instance != null && DialogueUI.Instance.inputUI.activeSelf;
+        // Toggle icons with the M key if dialogue UI isn't open
+        if (!isDialogueOpen && Keyboard.current.mKey.wasPressedThisFrame)
         {
             isVisible = !isVisible;
             foreach (var img in markerIcons) img.gameObject.SetActive(isVisible);
@@ -96,5 +97,15 @@ public class LocationMarkers : MonoBehaviour
         }
 
         return result;
+    }
+
+    public string GetLocationsContext()
+    {
+        string context = "Key Locations:\n";
+        foreach (var location in locations)
+        {
+            context += $"{location.targetTransform.name}\n";
+        }
+        return context;
     }
 }

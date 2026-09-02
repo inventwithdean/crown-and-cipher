@@ -8,10 +8,14 @@ mergeInto(LibraryManager.library, {
         }
 
         window.mcpMessageQueue = [];
+        // For the wait tool.
         window.mcpPendingResolve = null;
+        // For location, this will be resolved instantly
         window.mcpLocationResolve = null;
+        // For the system context, this will be resolved instantly as well
+        window.mcpPendingResolve = null;
 
-        // Register the Speak Tool
+        // NPC's speak Tool
         mcpContext.registerTool({
             name: "speak",
             description: "The NPC with the given name will speak the dialogue to the player.",
@@ -30,9 +34,10 @@ mergeInto(LibraryManager.library, {
             },
         });
 
+        // Wait tool
         mcpContext.registerTool({
             name: "wait",
-            description: "Waits on the event queue for player interaction. Call this to listen for replies.",
+            description: "Waits on the event queue for in game interactions. Call this after every tool. If you get any failure to this tool call, call it again. This is the gameplay loop.",
             inputSchema: { "type": "object", properties: {}, required: [] },
             execute: function (args) {
                 return new Promise((resolve) => {
@@ -44,14 +49,15 @@ mergeInto(LibraryManager.library, {
                         setTimeout(() => {
                             if (window.mcpPendingResolve === resolve) {
                                 window.mcpPendingResolve = null;
-                                resolve("wait again");
+                                resolve("call wait again.");
                             }
-                        }, 30000);
+                        }, 120000);
                     }
                 });
             }
         });
 
+        // Tool to return NPC's 2 closest locations
         mcpContext.registerTool({
             name: "get_npc_location",
             description: "Returns the top 2 closest locations to the specified NPC.",
@@ -66,16 +72,34 @@ mergeInto(LibraryManager.library, {
                 return new Promise((resolve) => {
                     window.mcpLocationResolve = resolve;
                     var payload = JSON.stringify({ npcName: args.npc_name });
+                    // NPCManager will call the ReturnNPCLocation function
                     window.unityInstance.SendMessage("NPCManager", "GetNPCLocationContext", payload);
                 });
             },
         });
 
+        // Tool to setup the story
+        mcpContext.registerTool({
+            name: "get_system_context",
+            description: "Fetches the context you'll need. This should be called before any other tool call, and only once.",
+            inputSchema: {
+                type: "object",
+                properties: {},
+                required: []
+            },
+            execute: function (args) {
+                return new Promise((resolve) => {
+                    window.mcpSystemContextResolve = resolve;
+                    // WebMCPManager will call the ReturnSystemContext function
+                    window.unityInstance.SendMessage("WebMCPManager", "GetSystemContext");
+                });
+            }
+        });
 
-
-        console.log("WebMCP Interrogation Tools Registered!");
+        console.log("WebMCP Tools Registered!");
     },
 
+    // When player sends a message to an NPC, WebMCPManager will call this function after receiving it from DialogueUI's delegate subscription
     EnqueuePlayerMessage: function (npcNamePtr, messagePtr) {
         var npcName = UTF8ToString(npcNamePtr);
         var message = UTF8ToString(messagePtr);
@@ -89,6 +113,7 @@ mergeInto(LibraryManager.library, {
         }
     },
 
+    // For interactions, this isn't being used as of now.
     EnqueueInteractionEvent: function (messagePtr) {
         var message = UTF8ToString(messagePtr);
 
@@ -103,11 +128,20 @@ mergeInto(LibraryManager.library, {
         }
     },
 
+    // 
     ReturnNPCLocation: function (resultPtr) {
         var result = UTF8ToString(resultPtr);
         if (window.mcpLocationResolve) {
             window.mcpLocationResolve(result);
             window.mcpLocationResolve = null;
+        }
+    },
+
+    ReturnSystemContext: function (resultPtr) {
+        var result = UTF8ToString(resultPtr);
+        if (window.mcpSystemContextResolve) {
+            window.mcpSystemContextResolve(result);
+            window.mcpSystemContextResolve = null;
         }
     }
 

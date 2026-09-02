@@ -1,13 +1,11 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(NPCProfile))]
 public class NPCInteractable : MonoBehaviour
 {
     private NPCProfile profile;
     private NPCWander wanderScript;
-    private bool isPlayerNear = false;
     private bool isTalking = false;
     private Transform playerTransform;
 
@@ -17,44 +15,18 @@ public class NPCInteractable : MonoBehaviour
         wanderScript = GetComponent<NPCWander>();
     }
 
-    void Update()
+    public void Interact(Transform player)
     {
-        if (isPlayerNear && !isTalking && Keyboard.current.fKey.wasPressedThisFrame)
-        {
-            StartConversation();
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            isPlayerNear = true;
-            playerTransform = other.transform;
-            DialogueUI.Instance.ToggleInteractPrompt(true);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            isPlayerNear = false;
-            DialogueUI.Instance.ToggleInteractPrompt(false);
-        }
-    }
-
-    private void StartConversation()
-    {
+        if (isTalking) return;
+        playerTransform = player;
         isTalking = true;
         DialogueUI.Instance.ToggleInteractPrompt(false);
         wanderScript.SetWanderState(false);
 
         StartCoroutine(FacePlayer());
-
-        // Pass this NPC's profile and a callback to unpause them when UI closes.
         DialogueUI.Instance.OpenDialogueBox(profile, EndConversation);
     }
+
 
     private void EndConversation()
     {

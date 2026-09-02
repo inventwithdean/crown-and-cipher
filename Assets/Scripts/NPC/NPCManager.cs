@@ -25,7 +25,7 @@ public class NPCManager : MonoBehaviour
         allNPCs = new List<NPCProfile>(FindObjectsByType<NPCProfile>());
     }
 
-    // Returns a compiled string of all NPCs for LLM to digest
+    // Returns a compiled string of all NPCs for LLM
     public string GetRosterContext()
     {
         string context = "City NPC Roster:\n";
@@ -35,6 +35,8 @@ public class NPCManager : MonoBehaviour
         }
         return context;
     }
+
+    // Will call jslib's ReturnNPCLocation function
     public void GetNPCLocationContext(string jsonPayload)
     {
         LocationRequest req = JsonUtility.FromJson<LocationRequest>(jsonPayload);

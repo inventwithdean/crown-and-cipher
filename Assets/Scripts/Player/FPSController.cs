@@ -10,6 +10,9 @@ public class FPSController : MonoBehaviour
     public float jumpHeight = 1.2f;
     public Transform cameraTarget;
 
+    public float interactDistance = 3f;
+    public NPCInteractable currentTarget;
+
     private CharacterController controller;
     private Vector3 velocity;
     private float xRotation = 0f;
@@ -36,20 +39,28 @@ public class FPSController : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            if (DialogueUI.Instance != null && !DialogueUI.Instance.inputUI.activeSelf)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        }
         HandleLook();
         HandleMovement();
+        HandleInteraction();
     }
+
 
     void HandleLook()
     {
-        if (Cursor.lockState != CursorLockMode.Locked) return;
+        if (Cursor.lockState != CursorLockMode.Locked || Cursor.visible == true) return;
 
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
         float mouseX = lookInput.x * lookSensitivity;
@@ -90,5 +101,45 @@ public class FPSController : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    void HandleInteraction()
+    {
+        if (DialogueUI.Instance != null && DialogueUI.Instance.inputUI.activeSelf)
+        {
+            if (Keyboard.current.tabKey.wasPressedThisFrame)
+            {
+                DialogueUI.Instance.CloseDialogueBox();
+                // We just closed the box, so we probably are looking at the NPC, so we should show the interact prompt
+                if (currentTarget) DialogueUI.Instance.ToggleInteractPrompt(true);
+            }
+            return;
+        }
+
+        Ray ray = new Ray(cameraTarget.position, cameraTarget.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, interactDistance))
+        {
+            NPCInteractable interactable = hit.collider.GetComponent<NPCInteractable>();
+            if (interactable != null)
+            {
+                if (currentTarget != interactable)
+                {
+                    currentTarget = interactable;
+                    DialogueUI.Instance.ToggleInteractPrompt(true);
+                }
+
+                if (Keyboard.current.tabKey.wasPressedThisFrame)
+                {
+                    currentTarget.Interact(transform);
+                }
+                return; // Exit early if we are looking at an NPC
+            }
+        }
+
+        if (currentTarget != null)
+        {
+            currentTarget = null;
+            DialogueUI.Instance.ToggleInteractPrompt(false);
+        }
     }
 }

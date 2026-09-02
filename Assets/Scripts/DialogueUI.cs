@@ -7,9 +7,8 @@ public class DialogueUI : MonoBehaviour
 {
     public static DialogueUI Instance { get; private set; }
 
+    // WebMCPManager subscribes to this delegate
     public static Action<NPCProfile, string> OnMessageSubmitted;
-    public static Action<NPCProfile> OnConversationEnded;
-
 
     public GameObject interactPromptText;
     public GameObject inputUI;
@@ -60,15 +59,11 @@ public class DialogueUI : MonoBehaviour
     {
         if (inputUI.activeSelf)
         {
+            // Only input this class handles is the enter key to send the message
             if (Keyboard.current.enterKey.wasPressedThisFrame)
             {
                 SubmitText();
                 inputField.ActivateInputField();
-            }
-            else if (Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                OnConversationEnded?.Invoke(currentNPC);
-                CloseDialogueBox();
             }
         }
     }
@@ -95,7 +90,7 @@ public class DialogueUI : MonoBehaviour
         }
     }
 
-    private void CloseDialogueBox()
+    public void CloseDialogueBox()
     {
         inputUI.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;

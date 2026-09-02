@@ -35,19 +35,10 @@ public class StandardCar : MonoBehaviour
         rb.centerOfMass = new Vector3(0, -0.5f, 0);
         carAudio = GetComponent<AudioSource>();
         carAudio.loop = true;
-        if (!carAudio.isPlaying)
-        {
-            carAudio.Play();
-        }
     }
 
     void OnEnable()
     {
-        if (carAudio != null && !carAudio.isPlaying)
-        {
-            carAudio.Play();
-        }
-
         ApplyBrakes(0f);
     }
 
@@ -112,6 +103,10 @@ public class StandardCar : MonoBehaviour
 
     void UpdateEngineAudio()
     {
+        if (carAudio != null && !carAudio.isPlaying && rb.linearVelocity.magnitude > 0.1f)
+        {
+            carAudio.Play();
+        }
         float currentSpeed = rb.linearVelocity.magnitude;
         carAudio.pitch = Mathf.Lerp(minPitch, maxPitch, currentSpeed / maxSpeedForAudio);
     }
