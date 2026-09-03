@@ -5,6 +5,8 @@
 * **Live Demo:** [http://webmcpgames.org/crown-and-cipher](http://webmcpgames.org/crown-and-cipher)
 * **Video Walkthrough:** [YouTube Demo](https://youtu.be/buW_ZOx5Ps8)
 
+![Screenshot](./poster.png)
+
 ---
 
 ## Overview
